@@ -1,6 +1,6 @@
 // 📁 commands/setup.js
 
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 
@@ -31,6 +31,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('setup')
     .setDescription('🛠 Thiết lập kênh gốc cho hệ thống voice')
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild) // ✅ Chỉ quản lý server mới dùng được
     .addSubcommand(sub =>
       sub
         .setName('tempvoice')
