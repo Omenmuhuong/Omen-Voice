@@ -35,6 +35,6 @@ module.exports = {
 ❤️ Cảm ơn vì đã chọn bot của tui!\nRất cảm kích đấy!
       `);
 
-    await interaction.reply({ embeds: [embed], ephemeral: true });
+    await interaction.reply({ embeds: [embed], ephemeral: false });
   }
 };
