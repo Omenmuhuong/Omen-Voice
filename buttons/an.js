@@ -1,5 +1,5 @@
 module.exports = {
-  data: 'private',  // Phải đúng với phần [1] khi split customId
+  data: 'hide',  // Phải đúng với phần [1] khi split customId
 
   async execute(interaction) {
     // Lấy channelId từ phần thứ 3 của customId
@@ -13,23 +13,23 @@ module.exports = {
     try {
       // Lấy quyền hiện tại của @everyone cho kênh này
       const perms = channel.permissionOverwrites.cache.get(interaction.guild.roles.everyone.id);
-      // Kiểm tra xem có đang private (deny Connect)
-      const isPrivate = perms?.deny.has('Connect');
+      // Kiểm tra xem đang bị ẩn không (deny ViewChannel)
+      const isHidden = perms?.deny.has('ViewChannel');
 
-      // Đảo trạng thái Connect
+      // Đảo trạng thái ViewChannel
       await channel.permissionOverwrites.edit(interaction.guild.roles.everyone, {
-        Connect: isPrivate ? true : false,
+        ViewChannel: isHidden ? true : false,
       });
 
       await interaction.reply({
-        content: isPrivate
-          ? '🌐 Kênh đã mở lại cho @everyone.'
-          : '🔒 Kênh đã chuyển sang chế độ **Private**.',
+        content: isHidden
+          ? '👁️ Đã hiện kênh trở lại cho @everyone.'
+          : '🙈 Đã ẩn kênh khỏi @everyone.',
         ephemeral: true,
       });
     } catch (err) {
-      console.error('❌ Lỗi khi đổi chế độ Private:', err);
-      await interaction.reply({ content: '❌ Không thể cập nhật quyền.', ephemeral: true });
+      console.error('❌ Lỗi khi ẩn/hiện kênh:', err);
+      await interaction.reply({ content: '❌ Không thể cập nhật quyền xem kênh.', ephemeral: true });
     }
   }
 };

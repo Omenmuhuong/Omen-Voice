@@ -83,11 +83,11 @@ module.exports = {
         const row = new ActionRowBuilder().addComponents(
           new ButtonBuilder()
             .setCustomId(`voice_private_${createdChannel.id}`)
-            .setLabel('🔒 Private')
+            .setLabel('🔒 Riêng tư')
             .setStyle(ButtonStyle.Secondary),
           new ButtonBuilder()
             .setCustomId(`voice_hide_${createdChannel.id}`)
-            .setLabel('👁 Hide')
+            .setLabel('👁 Ẩn')
             .setStyle(ButtonStyle.Secondary),
           new ButtonBuilder()
             .setCustomId(`voice_edit_${createdChannel.id}`)
