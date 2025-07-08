@@ -161,7 +161,8 @@ module.exports = {
       const index = tempChannels.indexOf(oldState.channel.id);
 
       const isTemp = index !== -1;
-      const isCouple = oldState.channel.parentId === config.couple;
+      const isCouple = oldState.channel.name === 'Double room 😪';
+
 
       if (isTemp || isCouple) {
         try {
