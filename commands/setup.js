@@ -1,13 +1,12 @@
 // 📁 commands/setup.js
 
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 
-// Đường dẫn file lưu dữ liệu cấu hình
 const dataPath = path.join(__dirname, '../data/voices.json');
 
-// Hàm đọc file
+// Hàm đọc dữ liệu
 function loadData() {
   if (!fs.existsSync(dataPath)) return {};
   try {
@@ -18,7 +17,7 @@ function loadData() {
   }
 }
 
-// Hàm ghi file
+// Hàm lưu dữ liệu
 function saveData(data) {
   try {
     fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
@@ -31,48 +30,50 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('setup')
     .setDescription('🛠 Thiết lập kênh gốc cho hệ thống voice')
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild) // ✅ Chỉ quản lý server mới dùng được
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .addSubcommand(sub =>
       sub
         .setName('tempvoice')
-        .setDescription('🎤 Thiết lập kênh gốc để tạo tempvoice')
-        .addStringOption(opt =>
-          opt.setName('name')
-            .setDescription('Tên kênh voice gốc (phải đúng 100%)')
+        .setDescription('Thiết lập kênh gốc để tạo tempvoice')
+        .addChannelOption(opt =>
+          opt.setName('channel')
+            .setDescription('Chọn kênh voice gốc')
             .setRequired(true)
+            .addChannelTypes(ChannelType.GuildVoice)
         )
     )
     .addSubcommand(sub =>
       sub
         .setName('couple')
-        .setDescription('💑 Thiết lập kênh gốc để tạo couple voice')
-        .addStringOption(opt =>
-          opt.setName('name')
-            .setDescription('Tên kênh voice gốc (phải đúng 100%)')
+        .setDescription('Thiết lập kênh gốc để tạo double voice')
+        .addChannelOption(opt =>
+          opt.setName('channel')
+            .setDescription('Chọn kênh voice gốc')
             .setRequired(true)
+            .addChannelTypes(ChannelType.GuildVoice)
         )
     ),
 
   async execute(interaction) {
     const sub = interaction.options.getSubcommand();
-    const name = interaction.options.getString('name');
+    const channel = interaction.options.getChannel('channel');
     const guildId = interaction.guild.id;
 
     const data = loadData();
     if (!data[guildId]) data[guildId] = {};
 
     if (sub === 'tempvoice') {
-      data[guildId].tempvoice = name;
+      data[guildId].tempvoice = channel.id;
       await interaction.reply({
-        content: `✅ Đã thiết lập voice gốc cho tempvoice là: **${name}**`,
+        content: `✅ Đã thiết lập <#${channel.id}> làm kênh gốc **Temp Voice**.`,
         ephemeral: true,
       });
     }
 
     if (sub === 'couple') {
-      data[guildId].couple = name;
+      data[guildId].couple = channel.id;
       await interaction.reply({
-        content: `💖 Đã thiết lập voice gốc cho couple voice là: **${name}**`,
+        content: `💖 Đã thiết lập <#${channel.id}> làm kênh gốc **Couple Voice**.`,
         ephemeral: true,
       });
     }

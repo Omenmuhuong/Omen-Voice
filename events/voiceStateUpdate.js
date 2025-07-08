@@ -50,11 +50,11 @@ module.exports = {
 
     const joinedChannel = newState.channel;
 
+    const isTempVoiceRoot = joinedChannel && joinedChannel.id === config.tempvoice;
+    const isCoupleVoiceRoot = joinedChannel && joinedChannel.id === config.couple;
+
     // ==== ✅ TẠO KÊNH TEMP VOICE ====
-    if (
-      joinedChannel &&
-      joinedChannel.name === config.tempvoice
-    ) {
+    if (isTempVoiceRoot) {
       try {
         const createdChannel = await guild.channels.create({
           name: `Phòng của ${member.user.username}`,
@@ -69,7 +69,7 @@ module.exports = {
         await member.voice.setChannel(createdChannel);
         console.log(`🎤 Đã tạo kênh tạm: ${createdChannel.name}`);
 
-        // 👉 Ghi lại ID kênh tạm để xoá bằng ID sau này
+        // 👉 Ghi lại ID kênh tạm
         const tempChannels = loadTempChannels();
         tempChannels.push(createdChannel.id);
         saveTempChannels(tempChannels);
@@ -116,10 +116,7 @@ module.exports = {
     }
 
     // ==== ✅ TẠO KÊNH COUPLE VOICE ====
-    if (
-      joinedChannel &&
-      joinedChannel.name === config.couple
-    ) {
+    if (isCoupleVoiceRoot) {
       try {
         const createdChannel = await guild.channels.create({
           name: 'Double room 😪',
@@ -154,7 +151,7 @@ module.exports = {
       }
     }
 
-    // ==== ✅ XOÁ KÊNH TEMP/COUPLE KHI TRỐNG (DÙ ĐỔI TÊN) ====
+    // ==== ✅ XOÁ KÊNH TEMP/COUPLE KHI TRỐNG (bằng ID) ====
     if (
       oldState.channel &&
       oldState.channel.members.size === 0 &&
@@ -162,15 +159,16 @@ module.exports = {
     ) {
       const tempChannels = loadTempChannels();
       const index = tempChannels.indexOf(oldState.channel.id);
-      const isCouple = oldState.channel.name === 'Double room 😪';
 
-      if (index !== -1 || isCouple) {
+      const isTemp = index !== -1;
+      const isCouple = oldState.channel.parentId === config.couple;
+
+      if (isTemp || isCouple) {
         try {
           await oldState.channel.delete();
           console.log(`🗑️ Đã xoá kênh voice: ${oldState.channel.name}`);
 
-          // Nếu là kênh tạm thì xoá ID khỏi danh sách
-          if (index !== -1) {
+          if (isTemp) {
             tempChannels.splice(index, 1);
             saveTempChannels(tempChannels);
           }
@@ -181,12 +179,12 @@ module.exports = {
       }
     }
 
-    // ==== ✅ ẨN/HIỆN CHỈ VỚI COUPLE ====
+    // ==== ✅ ẨN/HIỆN CHỈ VỚI COUPLE (theo ID cha) ====
     const currentChannel = newState.channel || oldState.channel;
 
     if (
       currentChannel &&
-      currentChannel.name === 'Double room 😪'
+      currentChannel.parentId === config.couple
     ) {
       const memberCount = currentChannel.members.size;
 
