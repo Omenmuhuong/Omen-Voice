@@ -25,7 +25,7 @@ module.exports = {
 
       await interaction.reply({
         content: `🔒 Kênh **${voiceChannel.name}** đã được khoá, người khác không thể vào.`,
-        ephemeral: true
+        ephemeral: false
       });
     } catch (err) {
       console.error('Lỗi khi khoá kênh:', err);

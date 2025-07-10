@@ -25,7 +25,7 @@ module.exports = {
 
       await interaction.reply({
         content: `🙈 Kênh **${voiceChannel.name}** đã được ẩn khỏi mọi người.`,
-        ephemeral: true
+        ephemeral: false
       });
     } catch (err) {
       console.error('Lỗi khi ẩn kênh:', err);

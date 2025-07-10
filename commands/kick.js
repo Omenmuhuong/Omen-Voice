@@ -61,7 +61,7 @@ module.exports = {
 
       if (!targetMember) {
         return selectInteraction.update({
-          content: '❌ Người này không còn trong voice!',
+          content: '❌ Người này không có trong voice!',
           components: []
         });
       }

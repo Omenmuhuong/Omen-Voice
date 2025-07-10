@@ -27,13 +27,13 @@ module.exports = {
 
       await interaction.reply({
         content: `✅ Đã đổi tên kênh thành: **${newName}**`,
-        ephemeral: true
+        ephemeral: false
       });
     } catch (err) {
       console.error('Lỗi khi đổi tên kênh:', err);
       await interaction.reply({
         content: '❌ Có lỗi xảy ra khi đổi tên kênh!',
-        ephemeral: true
+        ephemeral: false
       });
     }
   }

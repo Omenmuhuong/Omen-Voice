@@ -25,7 +25,7 @@ module.exports = {
 
       await interaction.reply({
         content: `✅ Kênh **${voiceChannel.name}** đã được hiển thị lại cho mọi người.`,
-        ephemeral: true
+        ephemeral: false
       });
     } catch (err) {
       console.error('Lỗi khi hiện kênh:', err);

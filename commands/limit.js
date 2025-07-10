@@ -42,7 +42,7 @@ module.exports = {
       await voiceChannel.setUserLimit(limit);
       return interaction.reply({
         content: `✅ Đã giới hạn voice còn **${limit} người**.`,
-        ephemeral: true
+        ephemeral: false
       });
     } catch (err) {
       console.error(err);

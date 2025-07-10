@@ -66,7 +66,7 @@ module.exports = {
       data[guildId].tempvoice = channel.id;
       await interaction.reply({
         content: `✅ Đã thiết lập <#${channel.id}> làm kênh gốc **Temp Voice**.`,
-        ephemeral: true,
+        ephemeral: false,
       });
     }
 
@@ -74,7 +74,7 @@ module.exports = {
       data[guildId].couple = channel.id;
       await interaction.reply({
         content: `💖 Đã thiết lập <#${channel.id}> làm kênh gốc **Couple Voice**.`,
-        ephemeral: true,
+        ephemeral: false,
       });
     }
 
