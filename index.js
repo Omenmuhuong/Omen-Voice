@@ -104,9 +104,15 @@ process.on('uncaughtException', (err) => {
   process.exit(1); // Render sẽ restart
 });
 
-// === 🌐 Giữ bot hoạt động 24/7 trên Render ===
+// 🌐 Giữ bot hoạt động trên Render Free bằng cách mở đúng port
 const express = require('express');
 const app = express();
 
-app.get('/', (req, res) => res.send('Bot is alive!'));
-app.listen(process.env.PORT || 3000, () => console.log('🌐 Web server is running'));
+// Route đơn giản để các bot như UptimeRobot ping vào
+app.get('/', (req, res) => res.status(200).send('Bot is alive!'));
+
+// Rất quan trọng: phải lắng nghe đúng port Render cung cấp
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🌐 Web server is running on port ${PORT}`);
+});
