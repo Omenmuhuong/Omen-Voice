@@ -6,7 +6,6 @@ const path = require('path');
 
 const dataPath = path.join(__dirname, '../data/voices.json');
 
-// Hàm đọc dữ liệu
 function loadData() {
   if (!fs.existsSync(dataPath)) return {};
   try {
@@ -17,7 +16,6 @@ function loadData() {
   }
 }
 
-// Hàm lưu dữ liệu
 function saveData(data) {
   try {
     fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
@@ -64,7 +62,8 @@ module.exports = {
 
     if (sub === 'tempvoice') {
       data[guildId].tempvoice = channel.id;
-      await interaction.reply({
+      saveData(data);
+      return interaction.reply({
         content: `✅ Đã thiết lập <#${channel.id}> làm kênh gốc **Temp Voice**.`,
         ephemeral: false,
       });
@@ -72,12 +71,11 @@ module.exports = {
 
     if (sub === 'couple') {
       data[guildId].couple = channel.id;
-      await interaction.reply({
+      saveData(data);
+      return interaction.reply({
         content: `💖 Đã thiết lập <#${channel.id}> làm kênh gốc **Couple Voice**.`,
         ephemeral: false,
       });
     }
-
-    saveData(data);
   }
 };

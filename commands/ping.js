@@ -11,7 +11,7 @@ module.exports = {
   // Đây là hàm xử lý khi user dùng lệnh
   async execute(interaction) {
     try {
-      await interaction.reply('👋 Gọi cái giề, đang ngủ 😪');
+      await interaction.reply('Gọi cái giề, đang ngủ 😪');
     } catch (err) {
       console.error('❌ Lỗi khi xử lý lệnh /ping:', err);
       await interaction.reply({ content: '🚨 Bot bị lỗi không trả lời được!', ephemeral: true });
