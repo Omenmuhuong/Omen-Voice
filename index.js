@@ -1,16 +1,14 @@
-// === 🌐 Web server mở port sớm để tránh Render timeout ===
+// 🌐 Web server cho Render Free
 const express = require('express');
 const app = express();
-
-app.get('/', (req, res) => res.status(200).send('💖 Bot voice is alive!'));
+app.get('/', (req, res) => res.send('💖 Bot voice is alive!'));
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🌐 Web server is running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`🌐 Web server is running on port ${PORT}`));
 
-// === 📦 Phần Discord bot ===
+// 📦 Phần chính của bot
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
 const client = new Client({
@@ -20,12 +18,11 @@ const client = new Client({
   ],
 });
 
-// === 🧠 Khởi tạo collection lệnh, nút và modal ===
 client.commands = new Collection();
 client.buttons = new Collection();
 client.modals = new Collection();
 
-// === 📂 Load lệnh Slash ===
+// === Load commands
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 for (const file of commandFiles) {
   const command = require(`./commands/${file}`);
@@ -34,7 +31,7 @@ for (const file of commandFiles) {
   }
 }
 
-// === 📂 Load buttons ===
+// === Load buttons
 const buttonFiles = fs.readdirSync('./buttons').filter(file => file.endsWith('.js'));
 for (const file of buttonFiles) {
   const button = require(`./buttons/${file}`);
@@ -43,7 +40,7 @@ for (const file of buttonFiles) {
   }
 }
 
-// === 📂 Load modals ===
+// === Load modals
 const modalFiles = fs.readdirSync('./modals').filter(file => file.endsWith('.js'));
 for (const file of modalFiles) {
   const modal = require(`./modals/${file}`);
@@ -52,56 +49,42 @@ for (const file of modalFiles) {
   }
 }
 
-// === ⚡ Xử lý tương tác ===
+// === Interaction handler
 client.on(Events.InteractionCreate, async interaction => {
   try {
-    // 👉 Slash command
     if (interaction.isChatInputCommand()) {
       const command = client.commands.get(interaction.commandName);
-      if (!command) return;
-      console.log(`📩 Slash command: /${interaction.commandName} từ ${interaction.user.tag}`);
-      await command.execute(interaction);
+      if (command) await command.execute(interaction);
+    } else if (interaction.isButton()) {
+      const buttonId = interaction.customId.split('_')[1];
+      const button = client.buttons.get(buttonId);
+      if (button) await button.execute(interaction);
+    } else if (interaction.isModalSubmit()) {
+      const modalId = interaction.customId.split('_')[0];
+      const modal = client.modals.get(modalId);
+      if (modal) await modal.execute(interaction);
     }
-
-    // 👉 Button
-    else if (interaction.isButton()) {
-      const key = interaction.customId.split('_')[1];
-      const button = client.buttons.get(key);
-      if (!button) return;
-      console.log(`🔘 Button: ${interaction.customId} từ ${interaction.user.tag}`);
-      await button.execute(interaction);
-    }
-
-    // 👉 Modal
-    else if (interaction.isModalSubmit()) {
-      const key = interaction.customId.split('_')[0];
-      const modal = client.modals.get(key);
-      if (!modal) return;
-      console.log(`📋 Modal: ${interaction.customId} từ ${interaction.user.tag}`);
-      await modal.execute(interaction);
-    }
-
   } catch (err) {
-    console.error('❌ Lỗi khi xử lý interaction:', err);
-    if (!interaction.replied && !interaction.deferred) {
-      await interaction.reply({ content: '❌ Đã xảy ra lỗi.', ephemeral: true }).catch(() => {});
+    console.error('❌ Lỗi xử lý tương tác:', err);
+    if (!interaction.replied) {
+      await interaction.reply({ content: '❌ Lỗi không xác định.', ephemeral: true });
     }
   }
 });
 
-// === 🔊 Sự kiện voiceStateUpdate ===
+// === Voice event
 const voiceEvent = require('./events/voiceStateUpdate');
 client.on(Events.VoiceStateUpdate, voiceEvent.execute);
 
-// === ✅ Khi bot online ===
-client.once(Events.ClientReady, () => {
-  console.log(`✅ Bot đã sẵn sàng với tên: ${client.user.tag}`);
+// === Ready
+client.once(Events.ClientReady, c => {
+  console.log(`✅ Bot đã sẵn sàng với tên: ${c.user.tag}`);
 });
 
-// === 🔐 Đăng nhập ===
+// === Login
 client.login(process.env.TOKEN);
 
-// === 🛡️ Auto restart khi crash ===
+// === Bắt lỗi ngoài ý muốn
 process.on('unhandledRejection', reason => {
   console.error('❌ Unhandled Rejection:', reason);
   process.exit(1);
