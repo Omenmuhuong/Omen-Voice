@@ -1,3 +1,15 @@
+// 🌐 Web server cho Render Free (mở port sớm để tránh timeout)
+const express = require('express');
+const app = express();
+
+app.get('/', (req, res) => res.status(200).send('💖 Bot voice is alive!'));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🌐 Web server is running on port ${PORT}`);
+});
+
+// === 📦 Phần Discord bot phía dưới ===
+
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 require('dotenv').config();
 const fs = require('fs');
@@ -25,58 +37,39 @@ for (const file of commandFiles) {
 const buttonFiles = fs.readdirSync('./buttons').filter(file => file.endsWith('.js'));
 for (const file of buttonFiles) {
   const button = require(`./buttons/${file}`);
-  client.buttons.set(button.data, button);
+  client.buttons.set(button.id, button); // 🔧 Sửa: dùng button.id thay vì button.data
 }
 
 // === 📦 Tải modals ===
 const modalFiles = fs.readdirSync('./modals').filter(file => file.endsWith('.js'));
 for (const file of modalFiles) {
   const modal = require(`./modals/${file}`);
-  client.modals.set(modal.data, modal);
+  client.modals.set(modal.id, modal); // 🔧 Sửa: dùng modal.id thay vì modal.data
 }
 
 // === ⚡️ Lắng nghe tương tác người dùng ===
 client.on(Events.InteractionCreate, async interaction => {
-  // 🟦 Nút bấm
-  if (interaction.isButton()) {
-    const buttonKey = interaction.customId.split('_')[1];
-    const button = client.buttons.get(buttonKey);
-    if (!button) return;
-
-    try {
-      await button.execute(interaction);
-    } catch (error) {
-      console.error(error);
-      await interaction.reply({ content: '❌ Có lỗi khi xử lý nút.', ephemeral: true });
+  try {
+    if (interaction.isButton()) {
+      const buttonKey = interaction.customId.split('_')[1];
+      const button = client.buttons.get(buttonKey);
+      if (button) await button.execute(interaction);
     }
-    return;
-  }
 
-  // 🟨 Modal (biểu mẫu)
-  if (interaction.isModalSubmit()) {
-    const modalKey = interaction.customId.split('_')[0];
-    const modal = client.modals.get(modalKey);
-    if (!modal) return;
-
-    try {
-      await modal.execute(interaction);
-    } catch (error) {
-      console.error(error);
-      await interaction.reply({ content: '❌ Có lỗi khi xử lý biểu mẫu.', ephemeral: true });
+    else if (interaction.isModalSubmit()) {
+      const modalKey = interaction.customId.split('_')[0];
+      const modal = client.modals.get(modalKey);
+      if (modal) await modal.execute(interaction);
     }
-    return;
-  }
 
-  // 🟩 Slash command
-  if (interaction.isChatInputCommand()) {
-    const command = client.commands.get(interaction.commandName);
-    if (!command) return;
-
-    try {
-      await command.execute(interaction);
-    } catch (error) {
-      console.error(error);
-      await interaction.reply({ content: '❌ Có lỗi khi xử lý lệnh.', ephemeral: true });
+    else if (interaction.isChatInputCommand()) {
+      const command = client.commands.get(interaction.commandName);
+      if (command) await command.execute(interaction);
+    }
+  } catch (error) {
+    console.error('❌ Lỗi khi xử lý tương tác:', error);
+    if (!interaction.replied) {
+      await interaction.reply({ content: '❌ Có lỗi xảy ra.', ephemeral: true });
     }
   }
 });
@@ -96,23 +89,10 @@ client.login(process.env.TOKEN);
 // === 🛡️ Bắt lỗi không mong muốn để tự restart ===
 process.on('unhandledRejection', (reason) => {
   console.error('❌ Unhandled Rejection:', reason);
-  process.exit(1); // Render sẽ restart
+  process.exit(1);
 });
 
 process.on('uncaughtException', (err) => {
   console.error('❌ Uncaught Exception:', err);
-  process.exit(1); // Render sẽ restart
-});
-
-// 🌐 Giữ bot hoạt động trên Render Free bằng cách mở đúng port
-const express = require('express');
-const app = express();
-
-// Route đơn giản để các bot như UptimeRobot ping vào
-app.get('/', (req, res) => res.status(200).send('Bot is alive!'));
-
-// Rất quan trọng: phải lắng nghe đúng port Render cung cấp
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🌐 Web server is running on port ${PORT}`);
+  process.exit(1);
 });
